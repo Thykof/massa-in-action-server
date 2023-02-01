@@ -49,6 +49,7 @@ function run(req: Request<object, object, IRunRequest>, res: Response) {
   const minified = source.replace(/^\s+|\s+$/g, '');
   fs.writeFileSync(`${projectName}/assembly/contracts/main.ts`, minified);
   fs.copyFileSync('.env', `${projectName}/.env`);
-  const output = child.execSync(`cd ${projectName} && npm run deploy`);
-  res.send(output);
+  child.exec(`cd ${projectName} && npm run deploy`, (_, stdout, __) => {
+    res.send(stdout);
+  });
 }
