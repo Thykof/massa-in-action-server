@@ -41,19 +41,22 @@ function run(req: Request<object, object, IRunRequest>, res: Response) {
   }
   if (!fs.existsSync(projectName)) {
     child.execSync(
-      `npx @massalabs/sc-project-initializer@dev init ${projectName}`
+      `npx @massalabs/sc-project-initializer@dev init ${projectName}`,
     );
   }
   child.execSync(`cd ${projectName}`);
   dependencies.forEach((packageToInstall) => {
     child.execSync(`cd ${projectName} && npm install ${packageToInstall}`);
   });
-  const minified =  source.replace(/^\s+|\s+$/g, '');
+  const minified = source.replace(/^\s+|\s+$/g, '');
   fs.writeFileSync(`${projectName}/assembly/contracts/main.ts`, minified);
-  fs.writeFileSync(`${projectName}/.env`, `
+  fs.writeFileSync(
+    `${projectName}/.env`,
+    `
 WALLET_PRIVATE_KEY='${process.env.WALLET_PRIVATE_KEY}'
 JSON_RPC_URL_PUBLIC=http://127.0.0.1:33035
-`);
+`,
+  );
   const output = child.execSync(`cd ${projectName} && npm run deploy`);
   res.send(output);
 }
