@@ -34,8 +34,7 @@ function run(req: Request<object, object, IRunRequest>, res: Response) {
   const source = req.body.source;
   const dependencies = req.body.metadata.dependencies;
   const timestamp = Date.now();
-  // const projectName = `projects/project-${timestamp}`;
-  const projectName = 'projects/project-1675246741617';
+  const projectName = `projects/project-${timestamp}`;
   if (!fs.existsSync('projects')) {
     fs.mkdirSync('projects');
   }
@@ -44,19 +43,12 @@ function run(req: Request<object, object, IRunRequest>, res: Response) {
       `npx @massalabs/sc-project-initializer@dev init ${projectName}`,
     );
   }
-  child.execSync(`cd ${projectName}`);
   dependencies.forEach((packageToInstall) => {
     child.execSync(`cd ${projectName} && npm install ${packageToInstall}`);
   });
   const minified = source.replace(/^\s+|\s+$/g, '');
   fs.writeFileSync(`${projectName}/assembly/contracts/main.ts`, minified);
-  fs.writeFileSync(
-    `${projectName}/.env`,
-    `
-WALLET_PRIVATE_KEY='${process.env.WALLET_PRIVATE_KEY}'
-JSON_RPC_URL_PUBLIC=http://127.0.0.1:33035
-`,
-  );
+  fs.copyFileSync('.env', `${projectName}/.env`);
   const output = child.execSync(`cd ${projectName} && npm run deploy`);
   res.send(output);
 }
