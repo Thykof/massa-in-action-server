@@ -10,7 +10,7 @@ interface IMetaData {
 
 interface IRunRequest {
   source: string;
-  metadata: IMetaData;
+  name: string;
 }
 
 dotenv.config();
@@ -32,7 +32,7 @@ app.listen(port, () => console.log('Running...'));
 
 function run(req: Request<object, object, IRunRequest>, res: Response) {
   const source = req.body.source;
-  const dependencies = req.body.metadata.dependencies;
+  const dependencies = getDependencies(req.body.name);
   const timestamp = Date.now();
   const projectName = `projects/project-${timestamp}`;
   if (!fs.existsSync('projects')) {
@@ -52,4 +52,10 @@ function run(req: Request<object, object, IRunRequest>, res: Response) {
   child.exec(`cd ${projectName} && npm run deploy`, (_, stdout, __) => {
     res.send(stdout);
   });
+}
+
+function getDependencies(name: string): Array<string> {
+  const content = fs.readFileSync(`pages/${name}/metadata.json`).toString();
+  const metadata = JSON.parse(content) as IMetaData;
+  return metadata.dependencies;
 }
