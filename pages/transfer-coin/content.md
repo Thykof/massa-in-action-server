@@ -1,3 +1,5 @@
 # transfer-coin
 
-http://localhost:5173/#generate-event
+WIP...
+
+Back to [`generateEvent`](http://localhost:5173/#generate-event)
